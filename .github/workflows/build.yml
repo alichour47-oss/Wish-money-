@@ -101,3 +101,4 @@ jobs:
       with:
         name: WhishMoney-APK
         path: android-project/app/build/outputs/apk/debug/*.apk
+        

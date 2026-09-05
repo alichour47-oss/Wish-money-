@@ -19,17 +19,20 @@ jobs:
         distribution: 'temurin'
         java-version: '17'
 
-    - name: Setup Android SDK
-      uses: android-actions/setup-android@v3
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@v3
 
-    - name: Prepare WebView Project
+    - name: Create Android Project
       run: |
-        mkdir -p android-project/app/src/main/assets
-        mkdir -p android-project/app/src/main/java/com/whish/app
+        mkdir -p android-app/app/src/main/assets
+        mkdir -p android-app/app/src/main/java/com/whish/app
         
-        cp -r * android-project/app/src/main/assets/ || true
+        # Copy web files
+        cp -r index.html android-app/app/src/main/assets/ || true
+        cp -r *.png *.jpg *.jpeg *.css *.js android-app/app/src/main/assets/ 2>/dev/null || true
 
-        cat << 'EOF' > android-project/app/src/main/java/com/whish/app/MainActivity.java
+        # Create MainActivity
+        cat << 'EOF' > android-app/app/src/main/java/com/whish/app/MainActivity.java
         package com.whish.app;
         import android.app.Activity;
         import android.os.Bundle;
@@ -52,7 +55,8 @@ jobs:
         }
         EOF
 
-        cat << 'EOF' > android-project/app/src/main/AndroidManifest.xml
+        # Create AndroidManifest
+        cat << 'EOF' > android-app/app/src/main/AndroidManifest.xml
         <manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.whish.app">
             <uses-permission android:name="android.permission.INTERNET" />
             <application android:label="Whish Money" android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
@@ -66,18 +70,38 @@ jobs:
         </manifest>
         EOF
 
-        cat << 'EOF' > android-project/build.gradle
-        buildscript {
-            repositories { google(); mavenCentral() }
-            dependencies { classpath 'com.android.tools.build:gradle:8.2.1' }
+        # Create settings.gradle
+        cat << 'EOF' > android-app/settings.gradle
+        pluginManagement {
+            repositories {
+                google()
+                mavenCentral()
+                gradlePluginPortal()
+            }
         }
-        allprojects {
-            repositories { google(); mavenCentral() }
+        dependencyResolutionManagement {
+            repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+            repositories {
+                google()
+                mavenCentral()
+            }
+        }
+        rootProject.name = "WhishApp"
+        include ':app'
+        EOF
+
+        # Create root build.gradle
+        cat << 'EOF' > android-app/build.gradle
+        plugins {
+            id 'com.android.application' version '8.2.1' apply false
         }
         EOF
 
-        cat << 'EOF' > android-project/app/build.gradle
-        plugins { id 'com.android.application' }
+        # Create app build.gradle
+        cat << 'EOF' > android-app/app/build.gradle
+        plugins {
+            id 'com.android.application'
+        }
         android {
             namespace 'com.whish.app'
             compileSdk 34
@@ -91,14 +115,14 @@ jobs:
         }
         EOF
 
-    - name: Build APK
+    - name: Build APK with Gradle
       run: |
-        cd android-project
+        cd android-app
         gradle assembleDebug
 
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
         name: WhishMoney-APK
-        path: android-project/app/build/outputs/apk/debug/*.apk
+        path: android-app/app/build/outputs/apk/debug/*.apk
         

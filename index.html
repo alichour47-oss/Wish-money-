@@ -1,0 +1,1277 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Whish Money — Prototype</title>
+<style>
+  :root{
+    --red:#E8123C;
+    --red-dark:#B8002E;
+    --bg:#1c1c1e;
+    --card-grey:#2c2c2e;
+    --text:#ffffff;
+    --sub:#9a9a9e;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    font-family:'Segoe UI',Tahoma,Arial,sans-serif;
+    background:#0b0c0e;
+    color:var(--text);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-height:100vh;
+  }
+  .phone{
+    width:390px;
+    height:844px;
+    background:var(--bg);
+    border-radius:40px;
+    overflow:hidden;
+    position:relative;
+    box-shadow:0 30px 80px rgba(0,0,0,.6), 0 0 0 10px #1a1b1e, 0 0 0 12px #333;
+  }
+  .screen{
+    position:absolute;
+    inset:0;
+    display:flex;
+    flex-direction:column;
+    background:var(--bg);
+    opacity:0;
+    pointer-events:none;
+    transform:translateX(16px);
+    transition:opacity .22s ease, transform .22s ease;
+    overflow:hidden;
+  }
+  .screen.active{
+    opacity:1;
+    pointer-events:auto;
+    transform:translateX(0);
+  }
+  .statusbar{
+    height:34px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:13px;
+    font-weight:600;
+    color:var(--text);
+    background:var(--bg);
+    flex-shrink:0;
+  }
+  .scroll{
+    flex:1;
+    overflow-y:auto;
+    -ms-overflow-style:none;
+    scrollbar-width:none;
+  }
+  .scroll::-webkit-scrollbar{display:none;}
+
+  /* ---------- LOGIN ---------- */
+  #login .scroll{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    padding:0 32px;
+    text-align:center;
+  }
+  .login-logo{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    font-size:46px;
+    font-weight:900;
+    color:var(--red);
+    margin-bottom:6px;
+  }
+  .login-logo svg{width:70px;height:auto;}
+  .login-title{font-size:15px;color:var(--sub);margin-bottom:40px;}
+  .field{
+    width:100%;
+    text-align:right;
+    margin-bottom:16px;
+  }
+  .field label{
+    display:block;
+    font-size:13px;
+    color:#9a9a9e;
+    margin-bottom:6px;
+    padding-right:4px;
+  }
+  .field input{
+    width:100%;
+    padding:14px 16px;
+    border-radius:14px;
+    border:1px solid #3a3a3c;
+    background:var(--card-grey);
+    color:#fff;
+    font-size:15px;
+    outline:none;
+    direction:rtl;
+  }
+  .field input:focus{border-color:var(--red);}
+  .btn-primary{
+    width:100%;
+    padding:15px;
+    border-radius:30px;
+    border:none;
+    background:linear-gradient(135deg,var(--red),var(--red-dark));
+    color:#fff;
+    font-size:16px;
+    font-weight:700;
+    margin-top:10px;
+    cursor:pointer;
+    box-shadow:0 8px 20px rgba(232,18,60,.35);
+  }
+  .btn-primary:active{transform:scale(.98);}
+  .login-hint{
+    margin-top:18px;
+    font-size:12px;
+    color:var(--sub);
+  }
+  .login-error{
+    color:var(--red);
+    font-size:13px;
+    margin-top:-6px;
+    margin-bottom:10px;
+    display:none;
+  }
+
+  /* ---------- TOP NAV (home) ---------- */
+  .topnav{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:10px 16px;
+    flex-shrink:0;
+    direction:ltr;
+  }
+  .topnav .icons{display:flex;gap:14px;align-items:center;}
+  .topnav .icons svg{width:22px;height:22px;stroke:#fff;}
+  .brand-mark{display:flex;align-items:center;}
+  .brand-mark svg{height:24px;width:auto;}
+  .curr-toggle{
+    display:flex;
+    align-items:center;
+    background:var(--card-grey);
+    border-radius:20px;
+    padding:4px;
+    font-size:13px;
+    font-weight:700;
+    gap:2px;
+  }
+  .curr-toggle span{
+    padding:6px 12px;
+    border-radius:16px;
+    color:#9a9a9e;
+    cursor:pointer;
+  }
+  .curr-toggle span.on{background:#111;color:#fff;}
+  .flag{
+    width:26px;height:26px;border-radius:50%;
+    overflow:hidden;
+    flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;
+    background:#222;
+  }
+  .flag svg{width:100%;height:100%;}
+
+  .search{
+    margin:8px 16px 14px;
+    background:var(--card-grey);
+    border-radius:26px;
+    padding:12px 18px;
+    display:flex;
+    align-items:center;
+    justify-content:flex-start;
+    gap:10px;
+    color:#b3bac3;
+    font-size:14px;
+    flex-shrink:0;
+  }
+  .search svg{width:18px;height:18px;stroke:#b3bac3;flex-shrink:0;}
+
+  .balance-card{
+    margin:0 16px 18px;
+    border-radius:20px;
+    padding:22px;
+    background:linear-gradient(135deg,#ff2b57,var(--red) 45%,#8f0026);
+    color:#fff;
+    position:relative;
+    overflow:hidden;
+    flex-shrink:0;
+    cursor:pointer;
+    user-select:none;
+  }
+  .balance-card::after{
+    content:"";
+    position:absolute;
+    right:-40px;bottom:-60px;
+    width:180px;height:180px;
+    background:radial-gradient(circle,rgba(0,0,0,.25),transparent 70%);
+  }
+  .balance-top{display:flex;justify-content:space-between;align-items:center;}
+  .balance-top svg{height:20px;}
+  .visa{font-style:italic;font-weight:800;font-size:20px;letter-spacing:.5px;}
+  .balance-label{margin-top:22px;font-size:14px;opacity:.9;direction:ltr;text-align:left;}
+  .balance-amt{
+    display:flex;align-items:center;gap:10px;
+    font-size:30px;font-weight:800;margin-top:6px;
+    direction:ltr;justify-content:flex-start;
+  }
+  .balance-amt .eye{opacity:.9;cursor:pointer;display:flex;align-items:center;}
+  .balance-amt .eye svg{width:20px;height:20px;stroke:#fff;fill:none;stroke-width:1.8;}
+  .activate-btn{
+    margin-top:16px;
+    display:inline-block;
+    background:rgba(255,255,255,.25);
+    padding:9px 18px;
+    border-radius:20px;
+    font-size:13px;
+    font-weight:700;
+    direction:ltr;
+  }
+
+  .actions-row{
+    display:flex;
+    justify-content:space-around;
+    margin:0 10px 22px;
+    flex-shrink:0;
+  }
+  .action-item{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:8px;
+    width:76px;
+    cursor:pointer;
+  }
+  .action-circle{
+    width:56px;height:56px;
+    border-radius:50%;
+    border:1.5px solid #4a4a4e;
+    display:flex;align-items:center;justify-content:center;
+    background:transparent;
+  }
+  .action-circle svg{width:22px;height:22px;stroke:#fff;fill:none;}
+  .action-item span{font-size:12.5px;font-weight:600;color:var(--text);text-align:center;line-height:1.3;}
+
+  .section-title{
+    padding:0 16px;
+    font-size:19px;
+    font-weight:800;
+    margin-bottom:12px;
+    flex-shrink:0;
+  }
+  .featured-row{
+    display:flex;
+    gap:14px;
+    padding:0 16px 20px;
+    overflow-x:auto;
+    flex-shrink:0;
+  }
+  .featured-item{
+    display:flex;flex-direction:column;align-items:center;gap:8px;
+    width:64px;flex-shrink:0;
+  }
+  .featured-icon{
+    width:60px;height:60px;
+    border-radius:16px;
+    background:var(--card-grey);
+    display:flex;align-items:center;justify-content:center;
+    font-weight:800;
+    font-size:20px;
+    color:var(--red);
+    overflow:hidden;
+  }
+  .featured-item span{font-size:11px;color:var(--sub);text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%;}
+
+  /* bottom nav */
+  .bottomnav{
+    display:flex;
+    align-items:center;
+    justify-content:space-around;
+    background:var(--bg);
+    padding:10px 6px 18px;
+    border-top:1px solid #2c2c2e;
+    flex-shrink:0;
+    position:relative;
+  }
+  .nav-item{
+    display:flex;flex-direction:column;align-items:center;gap:4px;
+    font-size:10.5px;color:var(--text);font-weight:600;
+    cursor:pointer;
+    flex:1;
+  }
+  .nav-item.active{color:var(--red);}
+  .nav-item svg{width:20px;height:20px;}
+  .nav-item.soon{position:relative;color:#c7ccd2;}
+  .nav-item .soon-badge{
+    position:absolute;top:-8px;
+    background:var(--red);color:#fff;
+    font-size:8px;font-weight:800;
+    padding:2px 6px;border-radius:8px;
+  }
+  .qr-fab{
+    width:52px;height:52px;
+    border-radius:50%;
+    background:var(--red);
+    display:flex;align-items:center;justify-content:center;
+    margin-top:-30px;
+    box-shadow:0 8px 18px rgba(232,18,60,.45);
+    flex-shrink:0;
+  }
+  .qr-fab svg{width:24px;height:24px;stroke:#fff;}
+
+  /* generic sub-page header */
+  .page-header{
+    padding:14px 16px 16px;
+    text-align:center;
+    position:relative;
+    background:var(--bg);
+    flex-shrink:0;
+  }
+  .page-header h2{margin:4px 0 0;font-size:19px;font-weight:800;}
+  .page-header .back-x, .page-header .fwd-arrow{
+    position:absolute;top:12px;
+    width:34px;height:34px;
+    border-radius:50%;
+    background:var(--card-grey);
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;
+  }
+  .page-header .back-x{left:16px;}
+  .page-header .fwd-arrow{left:16px;}
+
+  /* list style rows (menu, transfer, add money) */
+  .row-card{
+    background:var(--card-grey);
+    border-radius:18px;
+    margin:0 16px 14px;
+    overflow:hidden;
+    flex-shrink:0;
+  }
+  .row-item{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:16px 18px;
+    border-bottom:1px solid #3a3a3c;
+    cursor:pointer;
+  }
+  .row-item:last-child{border-bottom:none;}
+  .row-item .chevron{color:#9a9a9e;font-size:16px;}
+  .row-item .rlabel{font-size:15px;font-weight:600;color:var(--text);}
+  .row-item svg{width:20px;height:20px;stroke:#fff;}
+
+  .pill-card{
+    background:var(--card-grey);
+    border-radius:18px;
+    margin:0 16px 14px;
+    padding:16px 18px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    cursor:pointer;
+    flex-shrink:0;
+  }
+  .pill-card .pc-text .pc-title{font-size:16px;font-weight:800;margin-bottom:3px;}
+  .pill-card .pc-text .pc-sub{font-size:12px;color:var(--sub);}
+  .pill-card .pc-icon{
+    width:42px;height:42px;border-radius:50%;
+    background:var(--red);
+    display:flex;align-items:center;justify-content:center;
+    flex-shrink:0;margin-right:12px;
+  }
+  .pill-card .pc-icon svg{width:20px;height:20px;stroke:#fff;fill:none;}
+
+  /* form */
+  .form-wrap{padding:20px 16px;}
+  .field2{margin-bottom:18px;text-align:right;}
+  .field2 label{display:block;font-size:14px;margin-bottom:6px;color:var(--text);}
+  .field2 input{
+    width:100%;padding:13px 14px;border-radius:12px;
+    border:1px solid #3a3a3c;background:var(--card-grey);color:#fff;font-size:14px;outline:none;direction:rtl;
+  }
+  input::placeholder{color:#8a8a8e;}
+  .warn{color:var(--red);font-size:13px;text-align:center;margin:14px 0 4px;line-height:1.7;}
+  .send-btn{
+    width:100%;padding:15px;border-radius:30px;border:none;
+    background:linear-gradient(135deg,#ff2b57,var(--red-dark));
+    color:#fff;font-weight:800;font-size:16px;margin-top:14px;
+  }
+
+  /* profile */
+  .profile-head{
+    background:var(--card-grey);
+    margin:0 16px 14px;border-radius:18px;
+    padding:18px;
+    display:flex;align-items:center;justify-content:space-between;
+    flex-shrink:0;
+  }
+  .profile-head .name{font-size:17px;font-weight:800;}
+  .avatar{
+    width:44px;height:44px;border-radius:50%;
+    background:#aeb8c2;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .avatar svg{width:24px;height:24px;fill:#fff;}
+
+  /* balance edit modal */
+  .modal-overlay{
+    position:absolute;inset:0;
+    background:rgba(0,0,0,.5);
+    display:flex;align-items:center;justify-content:center;
+    opacity:0;pointer-events:none;
+    transition:opacity .2s ease;
+    z-index:50;
+  }
+  .modal-overlay.show{opacity:1;pointer-events:auto;}
+  .modal-box{
+    width:82%;
+    background:var(--card-grey);
+    border-radius:20px;
+    padding:22px;
+    transform:translateY(10px) scale(.96);
+    transition:transform .2s ease;
+  }
+  .modal-overlay.show .modal-box{transform:translateY(0) scale(1);}
+  .modal-box h3{margin:0 0 4px;font-size:16px;font-weight:800;text-align:center;}
+  .modal-box p{margin:0 0 16px;font-size:12px;color:var(--sub);text-align:center;}
+  .modal-box input{
+    width:100%;padding:12px 14px;border-radius:12px;
+    border:1px solid #3a3a3c;background:#1c1c1e;color:#fff;font-size:16px;text-align:center;font-weight:700;
+    outline:none;margin-bottom:14px;
+  }
+  .modal-box input:focus{border-color:var(--red);}
+  .modal-row{display:flex;gap:10px;}
+  .modal-row button{
+    flex:1;padding:12px;border-radius:14px;border:none;font-weight:700;font-size:14px;cursor:pointer;
+  }
+  .modal-cancel{background:#3a3a3c;color:#fff;}
+  .modal-save{background:var(--red);color:#fff;}
+
+  .home-indicator{
+    position:absolute;bottom:8px;left:50%;transform:translateX(-50%);
+    width:120px;height:4px;background:#000;border-radius:3px;opacity:.25;
+  }
+  .pc-box{
+    width:56px;height:56px;border-radius:12px;
+    background:#4a4a4e;
+    display:flex;align-items:center;justify-content:center;
+    color:#fff;font-size:24px;font-weight:800;
+  }
+</style>
+</head>
+<body>
+
+<div class="phone">
+
+  <!-- ============ LOGIN SCREEN ============ -->
+  <div class="screen active" id="login">
+    <div class="statusbar">01:21</div>
+    <div class="scroll">
+      <div class="login-logo">
+        <svg viewBox="0 0 485 173" xmlns="http://www.w3.org/2000/svg">
+          <path d="M0 58 L257 97 L106 102 L277 134 L180 138 L317 173 L340 163 L370 91 L401 164 L425 173 L441 157 L485 21 L473 3 L449 4 L419 84 L388 9 L372 0 L350 11 L322 85 L295 10 L278 0 L175 1 L247 25 L52 27 L242 56 Z" fill="#E8123C"/>
+        </svg>
+      </div>
+      <div class="login-title">تسجيل الدخول إلى حسابك</div>
+
+      <div class="field">
+        <label>رقم الهاتف</label>
+        <input type="text" id="loginPhone" placeholder="96181848768" inputmode="numeric">
+      </div>
+      <div class="field">
+        <label>الرمز السري</label>
+        <input type="password" id="loginPass" placeholder="••••••">
+      </div>
+      <div class="login-error" id="loginErr">فيك تكتب أي شي هون، هاد نموذج تجريبي فقط</div>
+      <button class="btn-primary" onclick="doLogin()">دخول</button>
+      <div class="login-hint">هاد نموذج تصميم تجريبي (Prototype) — أي بيانات بتدخلها بتدخّل عالحساب التجريبي</div>
+    </div>
+  </div>
+
+  <!-- ============ PASSCODE SCREEN ============ -->
+  <div class="screen" id="passcode" style="background:#232326;">
+    <div class="statusbar" style="background:#232326;color:#fff;">01:21</div>
+    <div class="scroll" style="display:flex;flex-direction:column;align-items:center;padding:40px 32px 0;">
+      <svg viewBox="0 0 485 173" style="width:70px;height:auto;margin-bottom:18px;">
+        <path d="M0 58 L257 97 L106 102 L277 134 L180 138 L317 173 L340 163 L370 91 L401 164 L425 173 L441 157 L485 21 L473 3 L449 4 L419 84 L388 9 L372 0 L350 11 L322 85 L295 10 L278 0 L175 1 L247 25 L52 27 L242 56 Z" fill="#E8123C"/>
+      </svg>
+      <div style="width:100%;border-top:1px solid #3a3a3c;margin-bottom:28px;"></div>
+      <div style="width:100%;color:var(--red);font-size:26px;font-weight:800;margin-bottom:6px;">Enter Passcode</div>
+      <div style="width:100%;color:#c7c7ca;font-size:14px;margin-bottom:28px;">Enter your 4 digit passcode.</div>
+      <div id="passcodeBoxes" onclick="document.getElementById('passcodeHidden').focus()" style="display:flex;gap:14px;margin-bottom:18px;cursor:text;">
+        <div class="pc-box"></div><div class="pc-box"></div><div class="pc-box"></div><div class="pc-box"></div>
+      </div>
+      <input id="passcodeHidden" type="tel" maxlength="4" style="position:absolute;opacity:0;pointer-events:none;" oninput="renderPasscode()">
+      <div style="width:100%;display:flex;justify-content:space-between;font-size:13px;">
+        <span style="color:var(--red);cursor:pointer;" onclick="go('home')">Use Face ID/ FingerPrint</span>
+        <span style="color:#c7c7ca;cursor:pointer;">Forgot Passcode?</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ HOME SCREEN ============ -->
+  <div class="screen" id="home">
+    <div class="statusbar">01:21</div>
+    <div class="scroll">
+      <div class="topnav">
+        <div class="icons">
+          <svg onclick="go('profile')" style="cursor:pointer" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 01-3.4 0"/></svg>
+        </div>
+        <div class="brand-mark">
+          <svg viewBox="0 0 485 173" xmlns="http://www.w3.org/2000/svg">
+            <path d="M0 58 L257 97 L106 102 L277 134 L180 138 L317 173 L340 163 L370 91 L401 164 L425 173 L441 157 L485 21 L473 3 L449 4 L419 84 L388 9 L372 0 L350 11 L322 85 L295 10 L278 0 L175 1 L247 25 L52 27 L242 56 Z" fill="#E8123C"/>
+          </svg>
+        </div>
+        <div class="curr-toggle">
+          <span id="curLBP" onclick="setCurrency('LBP')">LBP</span>
+          <span class="on" id="curUSD" onclick="setCurrency('USD')">USD</span>
+        </div>
+        <div class="flag" onclick="openCountryModal()" style="cursor:pointer">
+          <svg viewBox="0 0 3 2">
+            <rect width="3" height="2" fill="#fff"/>
+            <rect width="3" height="0.5" fill="#EE161F"/>
+            <rect y="1.5" width="3" height="0.5" fill="#EE161F"/>
+            <g fill="#00A651" transform="translate(1.5,1)">
+              <path d="M0,-0.35 L0.15,-0.05 L0.05,-0.05 L0.22,0.15 L0.08,0.15 L0.28,0.32 L-0.28,0.32 L-0.08,0.15 L-0.22,0.15 L-0.05,-0.05 L-0.15,-0.05 Z"/>
+              <rect x="-0.03" y="0.3" width="0.06" height="0.12"/>
+            </g>
+          </svg>
+        </div>
+      </div>
+
+      <div class="search">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input id="homeSearch" type="text" placeholder="ابحث" oninput="filterHomeSearch()" style="background:none;border:none;outline:none;color:var(--text);font-size:14px;flex:1;direction:rtl;">
+        <svg id="searchClear" onclick="clearHomeSearch()" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#9a9a9e" stroke-width="2" stroke-linecap="round" style="display:none;cursor:pointer;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </div>
+
+      <div class="balance-card" id="balanceCard">
+        <div class="balance-top">
+          <div class="visa">VISA</div>
+          <svg viewBox="0 0 485 173" xmlns="http://www.w3.org/2000/svg">
+            <path d="M0 58 L257 97 L106 102 L277 134 L180 138 L317 173 L340 163 L370 91 L401 164 L425 173 L441 157 L485 21 L473 3 L449 4 L419 84 L388 9 L372 0 L350 11 L322 85 L295 10 L278 0 L175 1 L247 25 L52 27 L242 56 Z" fill="#fff"/>
+          </svg>
+        </div>
+        <div class="balance-label">Total Balance</div>
+        <div class="balance-amt">
+          <span class="eye" id="eyeIcon" onclick="event.stopPropagation();toggleEye()"></span>
+          <span id="balanceValue">0 USD</span>
+        </div>
+        <div class="activate-btn">Activate Free Card</div>
+      </div>
+
+      <div class="actions-row">
+        <div class="action-item" data-label="add money اضافة رصيد" onclick="go('addmoney')">
+          <div class="action-circle"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke-linecap="round"/></svg></div>
+          <span>Add Money</span>
+        </div>
+        <div class="action-item" data-label="transfer تحويل" onclick="go('transfer')">
+          <div class="action-circle"><svg viewBox="0 0 24 24"><path d="M22 2L11 13" stroke-linecap="round" stroke-linejoin="round"/><path d="M22 2l-7 20-4-9-9-4 20-7z" stroke-linejoin="round"/></svg></div>
+          <span>Transfer</span>
+        </div>
+        <div class="action-item" data-label="cash out سحب الرصيد" onclick="alert('سحب الرصيد: هالميزة قيد التطوير بهالنموذج التجريبي')">
+          <div class="action-circle"><svg viewBox="0 0 24 24"><path d="M12 3v13M6 12l6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 21h14" stroke-linecap="round"/></svg></div>
+          <span>سحب الرصيد</span>
+        </div>
+        <div class="action-item" data-label="exchange تبديل عملة" onclick="alert('Exchange: هالميزة قيد التطوير بهالنموذج التجريبي')">
+          <div class="action-circle"><svg viewBox="0 0 24 24"><path d="M17 2l4 4-4 4M3 12v-2a4 4 0 014-4h14M7 22l-4-4 4-4M21 12v2a4 4 0 01-4 4H3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <span>Exchange</span>
+        </div>
+      </div>
+
+      <div class="section-title">Featured</div>
+      <div class="featured-row">
+        <div class="featured-item" data-label="promotions"><div class="featured-icon" style="background:linear-gradient(135deg,#ff5c7a,#8e2a8b);"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41L11 3.83A2 2 0 009.59 3.24H4a1 1 0 00-1 1v5.59a2 2 0 00.59 1.41l9.58 9.59a2 2 0 002.83 0l4.59-4.59a2 2 0 000-2.83z"/><circle cx="7.5" cy="7.5" r="1.2" fill="#fff" stroke="none"/></svg></div><span>Promotions</span></div>
+        <div class="featured-item" data-label="driving license"><div class="featured-icon" style="font-size:10px;font-weight:800;color:#3a6fd8;">IDL</div><span>Driving License</span></div>
+        <div class="featured-item" data-label="cccl"><div class="featured-icon" style="color:#00874e;"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#00874e" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 10-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z"/></svg></div><span>CCCL</span></div>
+        <div class="featured-item" data-label="wedding gift"><div class="featured-icon" style="color:#c9932c;"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#c9932c" stroke-width="1.8"><circle cx="9" cy="14" r="5"/><circle cx="15" cy="14" r="5"/></svg></div><span>Wedding Gift</span></div>
+        <div class="featured-item" data-label="u-18"><div class="featured-icon" style="color:var(--red);"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="var(--red)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg></div><span>U-18</span></div>
+      </div>
+      <div class="section-title">Telecom</div>
+      <div class="featured-row">
+        <div class="featured-item" data-label="touch lebanon"><div class="featured-icon" style="background:#00b0d8;color:#fff;font-size:11px;font-weight:800;">touch</div><span>Touch Lebanon</span></div>
+        <div class="featured-item" data-label="alfa lebanon"><div class="featured-icon" style="background:#e2001a;color:#fff;font-size:12px;font-weight:800;">alfa</div><span>Alfa Lebanon</span></div>
+        <div class="featured-item" data-label="talaco"><div class="featured-icon" style="font-size:10px;font-weight:800;">Talaco</div><span>Talaco</span></div>
+        <div class="featured-item" data-label="esim"><div class="featured-icon" style="background:#e2001a;color:#fff;font-size:11px;font-weight:800;">eSIM</div><span>eSIM</span></div>
+        <div class="featured-item" data-label="du uae"><div class="featured-icon" style="color:#5b3fd6;font-size:14px;font-weight:800;">du</div><span>DU UAE</span></div>
+      </div>
+      <div style="height:20px;"></div>
+    </div>
+
+    <div class="bottomnav">
+      <div class="nav-item" onclick="go('menu')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
+        القائمة
+      </div>
+      <div class="nav-item" onclick="go('business')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2"/><text x="12" y="16" font-size="7" font-weight="800" text-anchor="middle" stroke="none" fill="#333">$</text></svg>
+        Business
+      </div>
+      <div class="qr-fab"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h3v3h-3zM18 18h3v3h-3z"/></svg></div>
+      <div class="nav-item soon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#c7ccd2" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        Marketplace
+        <span class="soon-badge">Soon</span>
+      </div>
+      <div class="nav-item active" onclick="go('home')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#E8123C" stroke-width="2"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
+        الصفحة الرئيسية
+      </div>
+    </div>
+    <div class="home-indicator"></div>
+  </div>
+
+  <!-- ============ MENU SCREEN ============ -->
+  <div class="screen" id="menu">
+    <div class="statusbar">01:21</div>
+    <div class="scroll">
+      <div class="profile-head">
+        <div class="avatar" id="avatarMenu" onclick="triggerAvatarPick()" style="cursor:pointer"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 22c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg></div>
+        <div class="name" id="nameMenu" onclick="go('profile')" style="cursor:pointer">أضف اسمك</div>
+      </div>
+      <div class="row-card">
+        <div class="row-item" onclick="go('profile')"><span class="rlabel">ملفي الشخصي</span><span class="chevron">‹</span></div>
+        <div class="row-item"><span class="rlabel">مستنداتي / التحميلاتي</span><span class="chevron">‹</span></div>
+      </div>
+
+      <div class="section-title" style="text-align:right;direction:rtl">المالية</div>
+      <div class="row-card">
+        <div class="row-item"><span class="rlabel">WHISH رصيد</span><span class="chevron">‹</span></div>
+        <div class="row-item" onclick="go('transactions')"><span class="rlabel">المعاملات</span><span class="chevron">‹</span></div>
+        <div class="row-item"><span class="rlabel">المعاملات المعلقة</span><span class="chevron">‹</span></div>
+        <div class="row-item"><span class="rlabel">ملخص المعاملات</span><span class="chevron">‹</span></div>
+        <div class="row-item"><span class="rlabel">الحسابات المصرفية المحفوظة</span><span class="chevron">‹</span></div>
+        <div class="row-item"><span class="rlabel">البطاقات المحفوظة</span><span class="chevron">‹</span></div>
+        <div class="row-item"><span class="rlabel">سجل التعبئة</span><span class="chevron">‹</span></div>
+        <div class="row-item"><span class="rlabel">حسم مشتريات الجملة</span><span class="chevron">‹</span></div>
+        <div class="row-item"><span class="rlabel">البطاقات المخزنة</span><span class="chevron">‹</span></div>
+      </div>
+
+      <div class="row-card" style="padding:16px 18px;display:flex;align-items:center;justify-content:space-between;">
+        <span class="rlabel">Printer Setup</span>
+        <label style="position:relative;display:inline-block;width:40px;height:22px;">
+          <input type="checkbox" style="opacity:0;width:0;height:0;">
+          <span style="position:absolute;inset:0;background:#4a4a4e;border-radius:22px;"></span>
+        </label>
+      </div>
+
+      <div style="margin:0 16px 6px;font-weight:800;font-size:15px;">Locations</div>
+      <div class="row-card">
+        <div class="row-item"><span class="rlabel">Agents</span><span class="chevron">‹</span></div>
+        <div class="row-item"><span class="rlabel">Own Stores</span><span class="chevron">‹</span></div>
+      </div>
+
+      <div style="margin:0 16px 6px;font-weight:800;font-size:15px;">About Whish</div>
+      <div class="row-card">
+        <div class="row-item"><span class="rlabel">Call Us</span><span style="color:var(--sub);font-size:13px;direction:ltr;">+961 1 788 999</span></div>
+        <div class="row-item"><span class="rlabel">WhatsApp</span><span style="color:var(--sub);font-size:13px;direction:ltr;">+961 3 115 111</span></div>
+        <div class="row-item"><span class="rlabel">Email</span><span style="color:var(--sub);font-size:13px;direction:ltr;">info@whish.money</span></div>
+        <div class="row-item"><span class="rlabel">FAQ</span><span class="chevron">‹</span></div>
+        <div class="row-item"><span class="rlabel">Terms &amp; Conditions</span><span class="chevron">‹</span></div>
+        <div class="row-item"><span class="rlabel">Governance Risk &amp; Compliance</span><span class="chevron">‹</span></div>
+        <div class="row-item"><span class="rlabel">Fees &amp; Commissions</span><span class="chevron">‹</span></div>
+        <div class="row-item"><span class="rlabel">Whish Card Information</span><span class="chevron">‹</span></div>
+        <div class="row-item"><span class="rlabel">Check For Updates</span><span class="chevron">‹</span></div>
+      </div>
+    </div>
+    <div class="bottomnav">
+      <div class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="#E8123C" stroke-width="2"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>القائمة</div>
+      <div class="nav-item" onclick="go('business')"><svg viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2"/><text x="12" y="16" font-size="7" font-weight="800" text-anchor="middle" stroke="none" fill="#333">$</text></svg>Business</div>
+      <div class="qr-fab"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h3v3h-3zM18 18h3v3h-3z"/></svg></div>
+      <div class="nav-item soon"><svg viewBox="0 0 24 24" fill="none" stroke="#c7ccd2" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Marketplace<span class="soon-badge">Soon</span></div>
+      <div class="nav-item" onclick="go('home')"><svg viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>الصفحة الرئيسية</div>
+    </div>
+    <div class="home-indicator"></div>
+  </div>
+
+  <!-- ============ TRANSFER SCREEN ============ -->
+  <div class="screen" id="transfer">
+    <div class="statusbar">01:21</div>
+    <div class="page-header">
+      <div class="back-x" onclick="go('home')"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg></div>
+      <h2>Transfer</h2>
+    </div>
+    <div class="scroll">
+      <div class="pill-card" onclick="go('w2w')">
+        <div class="pc-text"><div class="pc-title">Whish to Whish</div><div class="pc-sub">Send Instantly to any Whish user</div></div>
+        <div class="pc-icon"><svg viewBox="0 0 24 24"><rect x="2" y="6" width="14" height="10" rx="2"/><rect x="8" y="3" width="14" height="10" rx="2"/></svg></div>
+      </div>
+      <div class="pill-card">
+        <div class="pc-text"><div class="pc-title">Lebanon Cash Pick-Up</div><div class="pc-sub">Send Cash Transfers Through Whish Locations</div></div>
+        <div class="pc-icon"><svg viewBox="0 0 24 24"><path d="M12 4v14M6 12l6 6 6-6"/></svg></div>
+      </div>
+      <div class="pill-card">
+        <div class="pc-text"><div class="pc-title">International Bank Accounts</div><div class="pc-sub">Send to Major International Bank Accounts</div></div>
+        <div class="pc-icon"><svg viewBox="0 0 24 24"><path d="M3 21h18M4 21V9l8-6 8 6v12M9 21V12h6v9"/></svg></div>
+      </div>
+      <div class="pill-card">
+        <div class="pc-text"><div class="pc-title">International Wallets</div><div class="pc-sub">Send to Major International Wallets</div></div>
+        <div class="pc-icon"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 9h18"/></svg></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ WHISH TO WHISH FORM ============ -->
+  <div class="screen" id="w2w">
+    <div class="statusbar">01:21</div>
+    <div class="page-header">
+      <div class="fwd-arrow" onclick="go('transfer')">›</div>
+      <div class="brand-mark" style="justify-content:center"><svg viewBox="0 0 485 173" style="height:22px"><path d="M0 58 L257 97 L106 102 L277 134 L180 138 L317 173 L340 163 L370 91 L401 164 L425 173 L441 157 L485 21 L473 3 L449 4 L419 84 L388 9 L372 0 L350 11 L322 85 L295 10 L278 0 L175 1 L247 25 L52 27 L242 56 Z" fill="#E8123C"/></svg></div>
+      <h2>Whish to Whish</h2>
+    </div>
+    <div class="scroll">
+      <div class="form-wrap">
+        <div class="field2" style="position:relative">
+          <label>رقم هاتف المستلم *</label>
+          <input type="text" id="w2wPhone" style="padding-right:44px">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#E8123C" stroke-width="2" style="position:absolute;right:14px;top:41px;width:18px;height:18px;"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
+        </div>
+        <div class="field2"><label>المبلغ المراد تحويله بالدولار الأمريكي *</label><input type="text" id="w2wAmount" placeholder="" oninput="document.getElementById('receivedAmount').value = this.value ? this.value : ''"></div>
+        <div class="field2"><label>ملاحظة</label><input type="text" placeholder=""></div>
+        <div class="field2"><label>المبلغ المستلم بالدولار الاميركي</label><input type="text" id="receivedAmount" disabled style="background:#151516;color:#8a8a8e"></div>
+        <div class="warn">كن حذرًا، إذا وقعت ضحية لعملية احتيال، فقد لا تتمكن من استرداد أموالك.<br>إلغاء هذه العملية يتطلب موافقة المستفيد</div>
+        <button class="send-btn" onclick="openTransferConfirm()">أرسل</button>
+      </div>
+    </div>
+
+    <!-- Transfer confirm dialog -->
+    <div class="modal-overlay" id="transferConfirmModal">
+      <div class="modal-box" style="background:#3a3a3a;text-align:left;direction:ltr;">
+        <h3 style="color:#fff;text-align:left;font-size:20px;margin-bottom:14px;">Whish to Whish</h3>
+        <p id="transferConfirmText" style="color:#eee;text-align:left;font-size:15px;line-height:1.5;margin-bottom:22px;"></p>
+        <div class="modal-row" style="justify-content:flex-end;gap:22px;">
+          <button onclick="closeTransferConfirm()" style="background:none;color:#ff3b5c;font-weight:800;flex:none;padding:6px;">CANCEL</button>
+          <button onclick="confirmTransfer()" style="background:none;color:#ff3b5c;font-weight:800;flex:none;padding:6px;">CONFIRM</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ TRANSACTIONS HISTORY SCREEN ============ -->
+  <div class="screen" id="transactions">
+    <div class="statusbar">01:21</div>
+    <div class="page-header">
+      <div class="back-x" onclick="go('menu')"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg></div>
+      <h2>المعاملات</h2>
+    </div>
+    <div class="scroll" id="transactionsList">
+      <div id="noTransactions" style="text-align:center;color:var(--sub);font-size:14px;margin-top:60px;">ما في معاملات مسجلة بعد</div>
+    </div>
+  </div>
+
+  <!-- ============ TRANSFER SUCCESS SCREEN ============ -->
+  <div class="screen" id="transferSuccess">
+    <div class="statusbar">01:21</div>
+    <div class="scroll" style="align-items:center;text-align:center;padding-top:60px;">
+      <div style="width:84px;height:84px;border-radius:50%;background:#20c060;display:flex;align-items:center;justify-content:center;margin:0 auto 22px;">
+        <svg viewBox="0 0 24 24" width="42" height="42" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <div style="font-size:19px;font-weight:700;color:#fff;margin-bottom:10px;">Transfer Successful</div>
+      <div id="successAmount" style="font-size:28px;font-weight:800;color:#fff;margin-bottom:24px;">0.00 USD</div>
+      <div style="width:100%;height:1px;background:#e2e6eb;margin-bottom:18px;"></div>
+      <div style="width:100%;padding:0 20px;text-align:right;direction:rtl;">
+        <div style="display:flex;justify-content:space-between;padding:10px 0;"><span style="color:var(--sub);font-size:14px;">المستلم</span><span id="successPhone" style="font-size:14px;font-weight:700;"></span></div>
+        <div style="display:flex;justify-content:space-between;padding:10px 0;"><span style="color:var(--sub);font-size:14px;">رقم المرجع</span><span id="successRef" style="font-size:14px;font-weight:700;"></span></div>
+        <div style="display:flex;justify-content:space-between;padding:10px 0;"><span style="color:var(--sub);font-size:14px;">التاريخ</span><span id="successDate" style="font-size:14px;font-weight:700;"></span></div>
+        <div style="display:flex;justify-content:space-between;padding:10px 0;"><span style="color:var(--sub);font-size:14px;">الحالة</span><span style="font-size:14px;font-weight:700;color:#20c060;">Completed</span></div>
+      </div>
+      <button class="send-btn" style="width:calc(100% - 40px);margin-top:26px;" onclick="go('home')">تم</button>
+    </div>
+  </div>
+
+  <!-- ============ ADD MONEY SCREEN ============ -->
+  <div class="screen" id="addmoney">
+    <div class="statusbar">01:21</div>
+    <div class="page-header">
+      <div class="back-x" onclick="go('home')"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg></div>
+      <h2>Add Money</h2>
+    </div>
+    <div class="scroll">
+      <div class="pill-card"><div class="pc-text"><div class="pc-title">Cash In</div><div class="pc-sub">Scan QR to Cash In</div></div><div class="pc-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></div></div>
+      <div class="pill-card"><div class="pc-text"><div class="pc-title">From a Card</div><div class="pc-sub">Fill Up Your Account Using Any Payment Card</div></div><div class="pc-icon"><svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg></div></div>
+      <div class="pill-card"><div class="pc-text"><div class="pc-title">From a Bank - US/CA</div><div class="pc-sub">Fill Up Your Account From Your Bank Account</div></div><div class="pc-icon"><svg viewBox="0 0 24 24"><path d="M3 21h18M4 21V9l8-6 8 6v12M9 21V12h6v9"/></svg></div></div>
+      <div class="pill-card"><div class="pc-text"><div class="pc-title">Whish Me</div><div class="pc-sub">Receive Money By Using Your Own QR Code</div></div><div class="pc-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></div></div>
+      <div class="pill-card"><div class="pc-text"><div class="pc-title">Through a Payment Link</div><div class="pc-sub">Send a Link to Receive a Card Payment</div></div><div class="pc-icon"><svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 007 0l3-3a5 5 0 00-7-7l-1 1"/><path d="M14 11a5 5 0 00-7 0l-3 3a5 5 0 007 7l1-1"/></svg></div></div>
+    </div>
+  </div>
+
+  <!-- ============ BUSINESS SCREEN ============ -->
+  <div class="screen" id="business">
+    <div class="statusbar">01:21</div>
+    <div class="page-header">
+      <div class="back-x" onclick="go('home')" style="background:transparent;"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg></div>
+      <h2 style="font-size:22px;">Business</h2>
+    </div>
+    <div class="scroll">
+      <div style="display:flex;gap:12px;padding:0 16px;flex-wrap:wrap;">
+        <div style="width:calc(50% - 6px);background:var(--card-grey);border-radius:16px;overflow:hidden;margin-bottom:12px;">
+          <div style="height:90px;background:linear-gradient(135deg,#c0392b,#7a1f16);display:flex;align-items:center;justify-content:center;">
+            <svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+          </div>
+          <div style="padding:12px;"><div style="font-weight:800;font-size:13px;">Join the Team</div><div style="font-size:11px;color:var(--sub);margin-top:2px;">Explore Careers at Whish</div></div>
+        </div>
+        <div style="width:calc(50% - 6px);background:var(--card-grey);border-radius:16px;overflow:hidden;margin-bottom:12px;">
+          <div style="height:90px;background:linear-gradient(135deg,#6b7fd7,#2a3b8f);display:flex;align-items:center;justify-content:center;">
+            <svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+          </div>
+          <div style="padding:12px;"><div style="font-weight:800;font-size:13px;">Activate Whish Pay</div><div style="font-size:11px;color:var(--sub);margin-top:2px;">Level Up your App or Website</div></div>
+        </div>
+        <div style="width:calc(50% - 6px);background:var(--card-grey);border-radius:16px;overflow:hidden;margin-bottom:12px;">
+          <div style="height:90px;background:linear-gradient(135deg,#d7263d,#8f0026);display:flex;align-items:center;justify-content:center;">
+            <svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/></svg>
+          </div>
+          <div style="padding:12px;"><div style="font-weight:800;font-size:13px;">Become an Agent</div><div style="font-size:11px;color:var(--sub);margin-top:2px;">Be Part of Our Network</div></div>
+        </div>
+        <div style="width:calc(50% - 6px);background:var(--card-grey);border-radius:16px;overflow:hidden;margin-bottom:12px;">
+          <div style="height:90px;background:linear-gradient(135deg,#e8123c,#7a0d24);display:flex;align-items:center;justify-content:center;">
+            <svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+          </div>
+          <div style="padding:12px;"><div style="font-weight:800;font-size:13px;">Get your Icon on Whish</div><div style="font-size:11px;color:var(--sub);margin-top:2px;">Receive Payments from Customers</div></div>
+        </div>
+        <div style="width:calc(50% - 6px);background:var(--card-grey);border-radius:16px;overflow:hidden;margin-bottom:12px;">
+          <div style="height:90px;background:linear-gradient(135deg,#8f0026,#3a0010);display:flex;align-items:center;justify-content:center;">
+            <svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12v6a2 2 0 01-2 2H6a2 2 0 01-2-2v-6"/><path d="M16 6l-4-4-4 4"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+          </div>
+          <div style="padding:12px;"><div style="font-weight:800;font-size:13px;">Apply for Disbursement</div><div style="font-size:11px;color:var(--sub);margin-top:2px;">Payroll &amp; Disbursement Solutions</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="bottomnav">
+      <div class="nav-item" onclick="go('menu')"><svg viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>القائمة</div>
+      <div class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="#E8123C" stroke-width="2"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2"/><text x="12" y="16" font-size="7" font-weight="800" text-anchor="middle" stroke="none" fill="#E8123C">$</text></svg>Business</div>
+      <div class="qr-fab"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h3v3h-3zM18 18h3v3h-3z"/></svg></div>
+      <div class="nav-item soon"><svg viewBox="0 0 24 24" fill="none" stroke="#c7ccd2" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Marketplace<span class="soon-badge">Soon</span></div>
+      <div class="nav-item" onclick="go('home')"><svg viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>الصفحة الرئيسية</div>
+    </div>
+    <div class="home-indicator"></div>
+  </div>
+
+  <!-- ============ PROFILE SCREEN ============ -->
+  <div class="screen" id="profile">
+    <div class="statusbar">01:21</div>
+    <div class="page-header">
+      <div class="fwd-arrow" onclick="go('menu')">›</div>
+      <div class="brand-mark" style="justify-content:center"><svg viewBox="0 0 485 173" style="height:22px"><path d="M0 58 L257 97 L106 102 L277 134 L180 138 L317 173 L340 163 L370 91 L401 164 L425 173 L441 157 L485 21 L473 3 L449 4 L419 84 L388 9 L372 0 L350 11 L322 85 L295 10 L278 0 L175 1 L247 25 L52 27 L242 56 Z" fill="#E8123C"/></svg></div>
+      <h2>حسابي</h2>
+    </div>
+    <div class="scroll">
+      <div style="text-align:center;padding:6px 16px 10px;">
+        <div id="editToggle" style="color:var(--red);font-size:13px;font-weight:700;text-decoration:underline;margin-bottom:14px;cursor:pointer" onclick="toggleProfileEdit()">تعديل</div>
+        <div style="position:relative;width:78px;margin:0 auto 10px;">
+          <div class="avatar" id="avatarProfile" onclick="triggerAvatarPick()" style="width:78px;height:78px;cursor:pointer"><svg viewBox="0 0 24 24" style="width:40px;height:40px"><circle cx="12" cy="8" r="4"/><path d="M4 22c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg></div>
+          <div onclick="triggerAvatarPick()" style="position:absolute;bottom:-2px;right:-2px;width:26px;height:26px;border-radius:50%;background:var(--red);border:2px solid var(--bg);display:flex;align-items:center;justify-content:center;cursor:pointer;">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          </div>
+        </div>
+        <div id="nameDisplay" style="font-weight:800;font-size:16px;">أضف اسمك</div>
+        <input id="nameInput" type="text" value="" placeholder="اسمك" style="display:none;text-align:center;font-weight:800;font-size:16px;margin-top:4px;border:1.5px solid var(--red);border-radius:10px;padding:6px 10px;background:var(--card-grey);color:#fff;">
+      </div>
+      <input type="file" id="avatarFile" accept="image/*" style="display:none" onchange="handleAvatarPick(event)">
+      <div class="form-wrap" style="padding-top:0">
+        <div class="field2"><label>معرف الحساب</label><input type="text" value="31336506-03" disabled style="background:#151516;color:#8a8a8e;font-weight:700"></div>
+        <div class="field2"><label>رقم الهاتف</label><input type="text" id="phoneInput" value="" disabled style="background:#151516;color:#8a8a8e;font-weight:700"></div>
+        <div id="saveProfileWrap" style="text-align:center;margin:10px 0;display:none;">
+          <button class="modal-save" style="width:auto;padding:12px 40px;" onclick="saveProfileEdit()">حفظ</button>
+        </div>
+
+        <div style="font-weight:800;font-size:15px;border-bottom:1px solid #3a3a3c;padding-bottom:10px;margin-bottom:16px;">معلومات الحساب</div>
+        <div style="display:flex;justify-content:center;gap:26px;margin-bottom:22px;">
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;"><input type="radio" name="acctType" checked style="accent-color:var(--red);width:16px;height:16px;"> فرد</label>
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;"><input type="radio" name="acctType" style="accent-color:var(--red);width:16px;height:16px;"> شركة</label>
+        </div>
+
+        <div style="font-weight:800;font-size:15px;border-bottom:1px solid #3a3a3c;padding-bottom:10px;margin-bottom:16px;">الهوية</div>
+        <div style="display:flex;justify-content:center;gap:26px;margin-bottom:18px;">
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;"><input type="radio" name="idType" checked style="accent-color:var(--red);width:16px;height:16px;"> بطاقة هوية</label>
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;"><input type="radio" name="idType" style="accent-color:var(--red);width:16px;height:16px;"> جواز سفر</label>
+        </div>
+
+        <div class="field2">
+          <label>الوجه الأمامي للهوية *</label>
+          <input type="file" accept="image/*" onchange="clearIdError()" style="background:var(--card-grey);color:#fff;padding:10px 14px;">
+          <div id="idError" style="color:var(--red);font-size:12px;margin-top:6px;">هالحقل إلزامي وما لازم يكون فاضي!</div>
+        </div>
+
+        <div style="text-align:center;margin:20px 0 8px;">
+          <button style="border-radius:24px;padding:12px 40px;border:1.5px solid var(--red);font-weight:700;color:var(--red);background:transparent;width:100%;">حذف الحساب</button>
+        </div>
+        <div style="text-align:center;margin:10px 0 16px;">
+          <button class="send-btn" style="width:100%;" onclick="go('login')">تسجيل الخروج</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ EDIT BALANCE MODAL (hidden feature) ============ -->
+  <div class="modal-overlay" id="balanceModal">
+    <div class="modal-box">
+      <h3>تعديل الرصيد (عرض تجريبي)</h3>
+      <p>هاد بس لتجربة شكل الرصيد بالتصميم — ما بأثر على أي حساب حقيقي</p>
+      <input type="text" id="modalBalanceInput" inputmode="decimal" placeholder="مثال: 1250.75">
+      <div class="modal-row">
+        <button class="modal-cancel" onclick="closeModal()">إلغاء</button>
+        <button class="modal-save" onclick="saveModalBalance()">تأكيد</button>
+      </div>
+    </div>
+  </div>
+  <!-- ============ CHOOSE COUNTRY MODAL ============ -->
+  <div class="modal-overlay" id="countryModal">
+    <div class="modal-box" style="padding:0;overflow:hidden;">
+      <div style="padding:18px;text-align:center;font-weight:800;font-size:16px;border-bottom:1px solid #3a3a3c;">Choose Country</div>
+      <div onclick="selectCountry('LB')" style="display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid #3a3a3c;cursor:pointer;">
+        <span style="display:flex;align-items:center;gap:12px;"><span class="flag" style="width:26px;height:26px;"><svg viewBox="0 0 3 2"><rect width="3" height="2" fill="#fff"/><rect width="3" height="0.5" fill="#EE161F"/><rect y="1.5" width="3" height="0.5" fill="#EE161F"/><g fill="#00A651" transform="translate(1.5,1)"><path d="M0,-0.35 L0.15,-0.05 L0.05,-0.05 L0.22,0.15 L0.08,0.15 L0.28,0.32 L-0.28,0.32 L-0.08,0.15 L-0.22,0.15 L-0.05,-0.05 L-0.15,-0.05 Z"/><rect x="-0.03" y="0.3" width="0.06" height="0.12"/></g></svg></span>Lebanon</span>
+        <span style="color:#9a9a9e;">+961</span>
+      </div>
+      <div onclick="selectCountry('AE')" style="display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid #3a3a3c;cursor:pointer;">
+        <span style="display:flex;align-items:center;gap:12px;"><span class="flag" style="width:26px;height:26px;"><svg viewBox="0 0 3 2"><rect width="1" height="2" fill="#FF0000"/><rect x="1" width="2" height="0.667" fill="#00732F"/><rect x="1" y="0.667" width="2" height="0.667" fill="#fff"/><rect x="1" y="1.333" width="2" height="0.667" fill="#000"/></svg></span>United Arab Emirates</span>
+        <span style="color:#9a9a9e;">+971</span>
+      </div>
+      <div onclick="selectCountry('OM')" style="display:flex;align-items:center;justify-content:space-between;padding:16px 18px;cursor:pointer;">
+        <span style="display:flex;align-items:center;gap:12px;"><span class="flag" style="width:26px;height:26px;"><svg viewBox="0 0 3 2"><rect width="3" height="0.667" fill="#fff"/><rect y="0.667" width="3" height="0.667" fill="#DB161C"/><rect y="1.333" width="3" height="0.667" fill="#008C45"/><rect width="1" height="2" fill="#DB161C"/></svg></span>Oman</span>
+        <span style="color:#9a9a9e;">+968</span>
+      </div>
+      <div style="padding:14px;">
+        <button class="modal-cancel" style="width:100%;" onclick="closeCountryModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const STORE_KEY = 'whishDemoState';
+let tapCount = 0;
+let tapTimer = null;
+let currentCurrency = 'USD';
+let balanceUSD = 500;
+let balanceLBP = 0;
+let hidden = false;
+let profileName = '';
+let profilePhone = '';
+let profileAvatar = '';
+let savedLoginPhone = '';
+
+function saveState(){
+  const state = {
+    balanceUSD, balanceLBP,
+    profileName, profilePhone, profileAvatar,
+    savedLoginPhone,
+    transactions
+  };
+  try{ localStorage.setItem(STORE_KEY, JSON.stringify(state)); }catch(e){}
+}
+
+function loadState(){
+  let raw = null;
+  try{ raw = localStorage.getItem(STORE_KEY); }catch(e){}
+  if(!raw) return;
+  try{
+    const state = JSON.parse(raw);
+    if(typeof state.balanceUSD === 'number') balanceUSD = state.balanceUSD;
+    if(typeof state.balanceLBP === 'number') balanceLBP = state.balanceLBP;
+    if(state.profileName) profileName = state.profileName;
+    if(state.profilePhone) profilePhone = state.profilePhone;
+    if(state.profileAvatar) profileAvatar = state.profileAvatar;
+    if(state.savedLoginPhone) savedLoginPhone = state.savedLoginPhone;
+    if(Array.isArray(state.transactions)) transactions = state.transactions;
+  }catch(e){}
+}
+
+function go(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function doLogin(){
+  // Prototype only: any input logs in
+  const phoneVal = document.getElementById('loginPhone').value.trim();
+  if(phoneVal){ savedLoginPhone = phoneVal; saveState(); }
+  go('passcode');
+  setTimeout(()=>{ document.getElementById('passcodeHidden').value=''; document.getElementById('passcodeHidden').focus(); }, 250);
+}
+
+function renderPasscode(){
+  const val = document.getElementById('passcodeHidden').value.replace(/\D/g,'').slice(0,4);
+  const boxes = document.querySelectorAll('#passcodeBoxes .pc-box');
+  boxes.forEach((b,i)=>{ b.textContent = val[i] || ''; });
+  if(val.length === 4){
+    setTimeout(()=>go('home'), 250);
+  }
+}
+
+function setCurrency(cur){
+  currentCurrency = cur;
+  document.getElementById('curUSD').classList.toggle('on', cur==='USD');
+  document.getElementById('curLBP').classList.toggle('on', cur==='LBP');
+  renderBalance();
+}
+
+const eyeOpenSVG = '<svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>';
+const eyeSlashSVG = '<svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.94 10.94 0 0112 19c-7 0-11-7-11-7a20.6 20.6 0 015.06-5.94M9.9 4.24A10.4 10.4 0 0112 4c7 0 11 7 11 7a20.5 20.5 0 01-2.66 3.79"/><path d="M14.12 14.12a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
+
+function renderBalance(){
+  const val = currentCurrency === 'USD' ? balanceUSD : balanceLBP;
+  const formatted = val.toLocaleString('en-US', {maximumFractionDigits: 2});
+  const el = document.getElementById('balanceValue');
+  el.textContent = formatted + ' ' + currentCurrency;
+  el.style.filter = hidden ? 'blur(7px)' : 'none';
+  el.style.userSelect = hidden ? 'none' : 'auto';
+  document.getElementById('eyeIcon').innerHTML = hidden ? eyeSlashSVG : eyeOpenSVG;
+  saveState();
+}
+
+function toggleEye(){
+  hidden = !hidden;
+  renderBalance();
+}
+
+function clearIdError(){
+  const err = document.getElementById('idError');
+  if(err) err.style.display = 'none';
+}
+
+function filterHomeSearch(){
+  const q = document.getElementById('homeSearch').value.trim().toLowerCase();
+  document.getElementById('searchClear').style.display = q ? 'block' : 'none';
+  document.querySelectorAll('.featured-item, .action-item').forEach(item=>{
+    const label = (item.getAttribute('data-label') || '').toLowerCase();
+    item.style.display = (!q || label.includes(q)) ? 'flex' : 'none';
+  });
+}
+function clearHomeSearch(){
+  document.getElementById('homeSearch').value = '';
+  filterHomeSearch();
+}
+
+document.getElementById('balanceCard').addEventListener('click', function(){
+  openModal();
+});
+
+function openModal(){
+  const pin = prompt('أدخل كلمة المرور لتعديل الرصيد:');
+  if(pin === null) return;
+  if(pin !== '2029'){
+    alert('كلمة المرور غلط');
+    return;
+  }
+  const current = currentCurrency === 'USD' ? balanceUSD : balanceLBP;
+  document.getElementById('modalBalanceInput').value = current;
+  document.getElementById('balanceModal').classList.add('show');
+}
+function closeModal(){
+  document.getElementById('balanceModal').classList.remove('show');
+}
+function saveModalBalance(){
+  const v = parseFloat(document.getElementById('modalBalanceInput').value) || 0;
+  if(currentCurrency === 'USD') balanceUSD = v; else balanceLBP = v;
+  hidden = false;
+  renderBalance();
+  closeModal();
+}
+
+const flagSVGs = {
+  LB: '<svg viewBox="0 0 3 2"><rect width="3" height="2" fill="#fff"/><rect width="3" height="0.5" fill="#EE161F"/><rect y="1.5" width="3" height="0.5" fill="#EE161F"/><g fill="#00A651" transform="translate(1.5,1)"><path d="M0,-0.35 L0.15,-0.05 L0.05,-0.05 L0.22,0.15 L0.08,0.15 L0.28,0.32 L-0.28,0.32 L-0.08,0.15 L-0.22,0.15 L-0.05,-0.05 L-0.15,-0.05 Z"/><rect x="-0.03" y="0.3" width="0.06" height="0.12"/></g></svg>',
+  AE: '<svg viewBox="0 0 3 2"><rect width="1" height="2" fill="#FF0000"/><rect x="1" width="2" height="0.667" fill="#00732F"/><rect x="1" y="0.667" width="2" height="0.667" fill="#fff"/><rect x="1" y="1.333" width="2" height="0.667" fill="#000"/></svg>',
+  OM: '<svg viewBox="0 0 3 2"><rect width="3" height="0.667" fill="#fff"/><rect y="0.667" width="3" height="0.667" fill="#DB161C"/><rect y="1.333" width="3" height="0.667" fill="#008C45"/><rect width="1" height="2" fill="#DB161C"/></svg>'
+};
+function openCountryModal(){
+  document.getElementById('countryModal').classList.add('show');
+}
+function closeCountryModal(){
+  document.getElementById('countryModal').classList.remove('show');
+}
+function selectCountry(code){
+  document.querySelector('.topnav .flag').innerHTML = flagSVGs[code];
+  closeCountryModal();
+}
+
+// ===== Avatar photo (demo/prototype only — stays in this session) =====
+function triggerAvatarPick(){
+  document.getElementById('avatarFile').click();
+}
+function handleAvatarPick(event){
+  const file = event.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e){
+    profileAvatar = e.target.result;
+    const imgHtml = '<img src="' + profileAvatar + '" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">';
+    document.getElementById('avatarMenu').innerHTML = imgHtml;
+    document.getElementById('avatarProfile').innerHTML = imgHtml;
+    saveState();
+  };
+  reader.readAsDataURL(file);
+}
+
+// ===== Profile edit (demo/prototype only) =====
+function toggleProfileEdit(){
+  const editing = document.getElementById('nameInput').style.display !== 'none';
+  const nameDisplay = document.getElementById('nameDisplay');
+  const nameInput = document.getElementById('nameInput');
+  const phoneInput = document.getElementById('phoneInput');
+  const saveWrap = document.getElementById('saveProfileWrap');
+  const toggle = document.getElementById('editToggle');
+  if(!editing){
+    nameInput.value = nameDisplay.textContent;
+    nameDisplay.style.display = 'none';
+    nameInput.style.display = 'block';
+    phoneInput.disabled = false;
+    phoneInput.style.background = '#2c2c2e';
+    saveWrap.style.display = 'block';
+    toggle.textContent = 'إلغاء';
+  } else {
+    nameDisplay.style.display = 'block';
+    nameInput.style.display = 'none';
+    phoneInput.disabled = true;
+    phoneInput.style.background = '#151516';
+    saveWrap.style.display = 'none';
+    toggle.textContent = 'تعديل';
+  }
+}
+function saveProfileEdit(){
+  profileName = document.getElementById('nameInput').value.trim();
+  profilePhone = document.getElementById('phoneInput').value.trim() || profilePhone;
+  applyProfileDisplay();
+  saveState();
+  toggleProfileEdit();
+}
+
+// ===== Transfer confirm + transaction history (demo/prototype only) =====
+let transactions = [];
+
+function openTransferConfirm(){
+  const phone = document.getElementById('w2wPhone').value.trim();
+  const amount = document.getElementById('w2wAmount').value.trim();
+  if(!phone || !amount){
+    alert('عبي رقم الهاتف والمبلغ أولاً');
+    return;
+  }
+  const amtNum = parseFloat(amount) || 0;
+  if(amtNum <= 0){
+    alert('دخل مبلغ صحيح');
+    return;
+  }
+  if(amtNum > balanceUSD){
+    alert('ما عندك رصيد كافي لإتمام هالتحويل');
+    return;
+  }
+  document.getElementById('transferConfirmText').textContent = phone + ' will receive ' + amtNum.toFixed(2) + ' USD.';
+  document.getElementById('transferConfirmModal').classList.add('show');
+}
+
+function closeTransferConfirm(){
+  document.getElementById('transferConfirmModal').classList.remove('show');
+}
+
+function generateFakeRef(phone){
+  // Reference = recipient phone with only the last digit swapped for a random digit
+  const digits = (phone || '00000000').replace(/\D/g,'').split('');
+  if(digits.length === 0) digits.push('0');
+  const lastIdx = digits.length - 1;
+  let newDigit = String(Math.floor(Math.random()*10));
+  let attempts = 0;
+  while(newDigit === digits[lastIdx] && attempts < 10){
+    newDigit = String(Math.floor(Math.random()*10));
+    attempts++;
+  }
+  digits[lastIdx] = newDigit;
+  return digits.join('');
+}
+
+function confirmTransfer(){
+  const phone = document.getElementById('w2wPhone').value.trim();
+  const amount = parseFloat(document.getElementById('w2wAmount').value) || 0;
+
+  if(amount > balanceUSD){
+    alert('ما عندك رصيد كافي لإتمام هالتحويل');
+    closeTransferConfirm();
+    return;
+  }
+  balanceUSD -= amount;
+  renderBalance();
+
+  const ref = generateFakeRef(phone);
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('en-GB') + ' ' + now.toLocaleTimeString('en-GB', {hour:'2-digit',minute:'2-digit'});
+
+  transactions.unshift({ phone, amount, ref, date: dateStr });
+  saveState();
+
+  document.getElementById('successPhone').textContent = phone;
+  document.getElementById('successAmount').textContent = amount.toFixed(2) + ' USD';
+  document.getElementById('successRef').textContent = ref;
+  document.getElementById('successDate').textContent = dateStr;
+
+  closeTransferConfirm();
+  renderTransactionsList();
+
+  // reset form for next time
+  document.getElementById('w2wPhone').value = '';
+  document.getElementById('w2wAmount').value = '';
+  document.getElementById('receivedAmount').value = '';
+
+  go('transferSuccess');
+}
+
+function renderTransactionsList(){
+  const list = document.getElementById('transactionsList');
+  if(transactions.length === 0){
+    list.innerHTML = '<div id="noTransactions" style="text-align:center;color:var(--sub);font-size:14px;margin-top:60px;">ما في معاملات مسجلة بعد</div>';
+    return;
+  }
+  let html = '';
+  transactions.forEach(t => {
+    html += '<div class="pill-card" style="cursor:default;">'
+      + '<div class="pc-text">'
+      + '<div class="pc-title">Whish to Whish</div>'
+      + '<div class="pc-sub">إلى: ' + t.phone + ' &middot; مرجع: ' + t.ref + '</div>'
+      + '<div class="pc-sub">' + t.date + '</div>'
+      + '</div>'
+      + '<div style="text-align:left;font-weight:800;font-size:15px;color:#ff4d6d;white-space:nowrap;">-' + t.amount.toFixed(2) + ' USD</div>'
+      + '</div>';
+  });
+  list.innerHTML = html;
+}
+function applyProfileDisplay(){
+  const display = profileName || 'أضف اسمك';
+  document.getElementById('nameDisplay').textContent = display;
+  document.getElementById('nameMenu').textContent = display;
+  document.getElementById('nameInput').value = profileName;
+  document.getElementById('phoneInput').value = profilePhone || savedLoginPhone || '';
+}
+
+function init(){
+  try{
+    loadState();
+    applyProfileDisplay();
+    if(profileAvatar){
+      const imgHtml = '<img src="' + profileAvatar + '" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">';
+      document.getElementById('avatarMenu').innerHTML = imgHtml;
+      document.getElementById('avatarProfile').innerHTML = imgHtml;
+    }
+    // If we already have a saved login phone, skip straight to the passcode screen
+    if(savedLoginPhone){
+      document.getElementById('loginPhone').value = savedLoginPhone;
+      go('passcode');
+    }
+    renderBalance();
+    renderTransactionsList();
+  }catch(e){
+    console.error('init() failed:', e);
+  }
+}
+
+init();
+</script>
+
+</body>
+</html>
